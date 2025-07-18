@@ -25,9 +25,6 @@ app.use(
   })
 );
 
-// Mount routes
-app.use(express.Router());
-
 // Routes
 app.get('/', (_, res) => {
   res.send("API working at '/' route");

@@ -7,7 +7,7 @@ const authrouter= express.Router();
 authrouter.post('/register',register);
 authrouter.post('/login',login);
 authrouter.post('/logout',logout);
-authrouter.post('/send-verify-otp',UserAuthMiddleware,sendVerifyOtp);
-authrouter.post('/verify-email',UserAuthMiddleware,verifyEmail);
+authrouter.post('/sendOtp',UserAuthMiddleware,sendVerifyOtp);
+authrouter.post('/verifyEmail',UserAuthMiddleware,verifyEmail);
 
 export default authrouter;

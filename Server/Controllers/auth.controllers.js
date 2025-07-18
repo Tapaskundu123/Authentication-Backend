@@ -2,7 +2,8 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { userModel } from '../models/user.model.js';
 import { transporter } from '../DB/nodemailer.js';
-
+import validator from 'validator'; // For email validation
+import crypto from 'crypto';
 export const register = async (req, res) => {
   const { name, email, password } = req.body;
 
@@ -89,43 +90,50 @@ export const logout = (req, res) => {
 };
 
 //send verification OTP to the user's email
-export const sendVerifyOtp= async(req,res)=>{
+export const sendVerifyOtp = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const userId = req.user?.id; // Use req.user from middleware
+
+    if (!userId || !email) {
+      return res.status(400).json({ success: false, message: 'Missing userId or email' });
+    }
+
+    const user = await userModel.findById(userId);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    if (user.email !== email) {
+      return res.status(400).json({ success: false, message: 'Email does not match user' });
+    }
+    if (user.isEmailVerified) {
+      return res.status(200).json({ success: true, message: 'User email already verified' });
+    }
+
+    const otp = crypto.randomInt(100000, 999999).toString();
+    user.verifyOtp = otp;
+    user.verifyOtpExpiredAt = Date.now() + 24 * 60 * 60 * 1000;
+    await user.save();
 
     try {
-        
-        const {userId}= req.body ;
-
-        const User= await userModel.findById(userId);
-
-
-        if(User.isEmailVerified){
-           return res.status(200)
-                     .json({success:true,message:'User Email already verified'})
-        }
-
-        const otp = String(Math.floor(100000 + Math.random() * 900000));
-
-        User.verifyOtp= otp;
-        User.verifyOtpExpiredAt= Date.now() + 24 * 60 * 60 * 1000 //1d
-        
-      await User.save();
-
-      //sending verification OTP mail 
-    const mailOption={
+      await transporter.sendMail({
         from: process.env.SENDER_EMAIL,
         to: email,
         subject: 'Account Verification OTP',
-        text: `Your OTP is ${otp}. Verify your account using this OTP.`
+        text: `Your OTP is ${otp}. Verify your account using this OTP.`,
+        
+      });
+    } catch (emailError) {
+      console.error('Failed to send OTP email:', emailError.message);
     }
 
-    await transporter.sendMail(mailOption);
-
-     return res.status(200)
-               .json({success:true,message:'Verification OTP sent on this Email'})
- } catch (err) {
-         return res.status(400).json({ success: false, message: err.message });
-    }
-}
+    console.log(otp);
+    return res.status(200).json({ success: true, message: 'Verification OTP sent to email' });
+  } catch (err) {
+    console.error('Send OTP error:', err.message);
+    return res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
 
 export const verifyEmail= async(req,res)=>{
 
@@ -135,7 +143,6 @@ export const verifyEmail= async(req,res)=>{
              return res.status(400)
                        .json({ success: false, message: "Missing Details" });
         }
-        
         try{
        
             const User= await userModel.findById(userId);
@@ -161,7 +168,7 @@ export const verifyEmail= async(req,res)=>{
             await User.save();
 
             return res.status(200)
-                          .json({ success: true, message: "Email verified Successfully" });
+                    .json({ success: true, message: "Email verified Successfully" });
         }
     catch (err) {
         return res.status(400).json({ success: false, message: "" });
