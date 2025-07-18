@@ -3,7 +3,7 @@ import cors from 'cors';
 import 'dotenv/config';
 import cookieParser from 'cookie-parser';
 import ConnectDB from './DB/MongoDB.js';
-
+import authRoutes from './Routes/authRoutes.js'
 ConnectDB();//connect to Database
 const app = express();
 
@@ -33,19 +33,7 @@ app.get('/', (_, res) => {
   res.send("API working at '/' route");
 });
 
-app.get('/login', (_, res) => {
-  res.send('API working at /login route');
-});
-
-app.get('/test', (_, res) => {
-  res.send('Test route hit');
-});
-
-// 404 fallback route
-app.use((req, res) => {
-  res.status(404).json({ error: 'Route not found' });
-});
-
+app.use('/api/auth',authRoutes)
 // Server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
