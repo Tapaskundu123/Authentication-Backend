@@ -19,7 +19,7 @@ const userSchema= new mongoose.Schema({
         default:0
     },
     verifyOtpExpiredAt:{
-        type:Number,
+        type:Date,
         default:0
     },
     isEmailVerified:{
@@ -27,11 +27,11 @@ const userSchema= new mongoose.Schema({
         default:false
     },
     resetOTP:{
-        type:Boolean,
+        type:String,
         default:false
     },
     resetOTPExpiredAt:{
-        type:Number,
+        type: Date,
         default:0
     }
 })

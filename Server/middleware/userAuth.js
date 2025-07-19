@@ -11,6 +11,7 @@ export const UserAuthMiddleware = async (req, res, next) => {
       return res.status(500).json({ success: false, message: 'Server configuration error' });
     }
     const decodedToken = jwt.verify(token, process.env.JWT_SECRET_KEY);
+
     req.user = { id: decodedToken.id }; // Set req.user instead of req.body
     next();
   }
