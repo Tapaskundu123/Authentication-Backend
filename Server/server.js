@@ -4,6 +4,8 @@ import 'dotenv/config';
 import cookieParser from 'cookie-parser';
 import ConnectDB from './DB/MongoDB.js';
 import authRoutes from './Routes/authRoutes.js'
+import userRoutes from './Routes/userRoutes.js'
+
 ConnectDB();//connect to Database
 const app = express();
 
@@ -30,7 +32,12 @@ app.get('/', (_, res) => {
   res.send("API working at '/' route");
 });
 
-app.use('/api/auth',authRoutes)
+
+//app endpoints
+app.use('/api/auth',authRoutes);
+app.use('/api/user',userRoutes)
+
+
 // Server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
