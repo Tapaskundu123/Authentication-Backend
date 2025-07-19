@@ -32,11 +32,9 @@ app.get('/', (_, res) => {
   res.send("API working at '/' route");
 });
 
-
 //app endpoints
 app.use('/api/auth',authRoutes);
 app.use('/api/user',userRoutes)
-
 
 // Server
 const PORT = process.env.PORT || 3000;

@@ -93,6 +93,7 @@ export const logout = (req, res) => {
 export const sendVerifyOtp = async (req, res) => {
   try {
     const { email } = req.body;
+    console.log(req.user)
     const userId = req.user?.id; // Use req.user from middleware
 
     if (!userId || !email) {
@@ -123,7 +124,8 @@ export const sendVerifyOtp = async (req, res) => {
         text: `Your OTP is ${otp}. Verify your account using this OTP.`,
         
       });
-    } catch (emailError) {
+    }
+     catch (emailError) {
       console.error('Failed to send OTP email:', emailError.message);
     }
 
@@ -135,45 +137,40 @@ export const sendVerifyOtp = async (req, res) => {
   }
 };
 
-export const verifyEmail= async(req,res)=>{
+export const verifyEmail = async (req, res) => {
+  const { otp } = req.body;
+  const userId = req.user?.id; // Get from middleware
 
-        const {userId, otp}= req.body;
+  if (!userId || !otp) {
+    return res.status(400).json({ success: false, message: "Missing Details" });
+  }
 
-        if(!userId || !otp){
-             return res.status(400)
-                       .json({ success: false, message: "Missing Details" });
-        }
-        try{
-       
-            const User= await userModel.findById(userId);
+  try {
+    const User = await userModel.findById(userId);
 
-            if(!User){
-                return res.status(404)
-                       .json({ success: false, message: "User not found" }); 
-            }
-            if( User.verifyOtp=='' || User.verifyOtp!== otp){
-                 return res.status(400)
-                       .json({ success: false, message: "Invalid OTP" });
-            }
-
-            if(User.verifyOtpExpiredAt < Date.now()){
-                return res.status(400)
-                          .json({ success: false, message: "OTP Expired" });
-            }
-            User.isEmailVerified= true;
-            User.verifyOtp='';
-            User.verifyOtpExpiredAt='';
-
-
-            await User.save();
-
-            return res.status(200)
-                    .json({ success: true, message: "Email verified Successfully" });
-        }
-    catch (err) {
-        return res.status(400).json({ success: false, message: "" });
+    if (!User) {
+      return res.status(404).json({ success: false, message: "User not found" });
     }
-}
+
+    if (!User.verifyOtp || User.verifyOtp !== otp) {
+      return res.status(400).json({ success: false, message: "Invalid OTP" });
+    }
+
+    if (User.verifyOtpExpiredAt < Date.now()) {
+      return res.status(400).json({ success: false, message: "OTP Expired" });
+    }
+
+    User.isEmailVerified = true;
+    User.verifyOtp = '';
+    User.verifyOtpExpiredAt = '';
+
+    await User.save();
+
+    return res.status(200).json({ success: true, message: "Email verified Successfully" });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: "Server Error" });
+  }
+};
 
 export const isAuthenticated= async(req,res)=>{
 
