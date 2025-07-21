@@ -1,3 +1,13 @@
 html,body{
   height: 100vh;
 }
+input:-webkit-autofill {
+  box-shadow: 0 0 0px 1000px #1e40af inset !important; /* Tailwind bg-blue-800 */
+  -webkit-text-fill-color: white !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+input:-webkit-autofill::first-line {
+  font-family: inherit;
+  font-size: inherit;
+}
