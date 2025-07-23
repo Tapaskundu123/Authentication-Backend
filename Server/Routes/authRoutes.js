@@ -13,6 +13,5 @@ authrouter.post('/is-Auth',UserAuthMiddleware,isAuthenticated);
 authrouter.post('/send-resetPassword-otp',sendResetPasswordOtp);
 authrouter.post('/reset-password',resetPassword);
 
-
 export default authrouter;
 

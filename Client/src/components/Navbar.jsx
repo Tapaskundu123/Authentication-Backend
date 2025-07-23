@@ -6,8 +6,8 @@ import { useNavigate } from 'react-router-dom';
 const Navbar = () => {
     const navigate= useNavigate();
   return (
-    <div className='flex justify-between py-6 px-6 '>
-        <div className='flex gap-0.5'>
+    <div className='flex justify-between py-6 px-6  '>
+        <div className='flex gap-0.5 '>
            <img className='h-10 w-28' src={faviconImg} alt="logo-img" />
            <h1 className='font-bold text-3xl'>auth</h1>
         </div>
