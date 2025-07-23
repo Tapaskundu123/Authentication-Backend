@@ -16,6 +16,11 @@ const Navbar = () => {
           <button onClick={()=>navigate('/login')} className='border-2 py-2 px-7 relative rounded-2xl  hover:bg-blue-500 hover:text-white  hover:cursor-pointer'>Login</button>
           <ArrowRight className='absolute right-4 px-1 mr-2 ml-2 '/>
         </div>
+
+        <div className='flex items-center justify-between '>
+          <button onClick={()=>navigate('/email-verify')} className='border-2 py-2 px-7 relative rounded-2xl  hover:bg-blue-500 hover:text-white  hover:cursor-pointer'>Verify Email</button>
+          <ArrowRight className='absolute right-4 px-1 mr-2 ml-2 '/>
+        </div>
     </div>
   )
 }
