@@ -138,7 +138,7 @@ export const sendVerifyOtp = async (req, res) => {
   }
 };
 
-export const verifyEmail = async (req, res) => {
+export const verifyOtpChangePassword = async (req, res) => {
   const { otp } = req.body;
   const userId = req.user?.id;
   console.log('Received OTP:', otp, 'User ID:', userId); // Debug log
@@ -154,21 +154,24 @@ export const verifyEmail = async (req, res) => {
     }
 
     console.log('Stored OTP:', User.verifyOtp, 'Provided OTP:', otp); // Debug log
-    if (!User.verifyOtp || User.verifyOtp !== otp) {
+
+    if (!User.resetOTP || User.resetOTP !== otp) {
       return res.status(400).json({ success: false, message: "Invalid OTP" });
     }
 
     console.log('OTP Expiration:', User.verifyOtpExpiredAt, 'Current Time:', Date.now()); // Debug log
-    if (User.verifyOtpExpiredAt < Date.now()) {
+
+    if (User.resetOTPExpiredAt < Date.now()) {
       return res.status(400).json({ success: false, message: "OTP Expired" });
     }
 
     User.isEmailVerified = true;
-    User.verifyOtp = '';
-    User.verifyOtpExpiredAt = '';
+    User.resetOTP = '';
+    User.resetOTPExpiredAt = '';
     await User.save();
 
-    return res.status(200).json({ success: true, message: "Email verified Successfully" });
+    return res.status(200).json({ success: true, message: "OTP verified Successfully" });
+
   } catch (err) {
     console.error('Server Error:', err); // Debug log
     return res.status(500).json({ success: false, message: "Server Error" });
@@ -176,16 +179,14 @@ export const verifyEmail = async (req, res) => {
 };
 
 export const isAuthenticated= async(req,res)=>{
-
   try {
-
     return res.json({success:true, message:"User is authenticated"})
   } catch (error) {
     console.error(error)
   }
 }
 
-export const sendResetPasswordOtp = async (req, res) => {
+export const verifyEmailChangePassword = async (req, res) => {
   try {
     const { email } = req.body;
 
@@ -222,44 +223,34 @@ export const sendResetPasswordOtp = async (req, res) => {
   }
 };
 
-
-export const resetPassword= async(req,res)=>{
+export const resetNewPassword= async(req,res)=>{
 
   try{
-  const {email, otp, newPassword}= req.body;
+   const {newPassword}= req.body;
+   const userId = req.user?.id;
 
-   if(!email || !otp || !newPassword){
-      
-    return res.json({success: false, message:"Email, OTP, and new password are required"})
+   if(!newPassword){ 
+    return res.status(400) 
+             .json({success: false, message:"new password are required"})
    }
 
-   const User= await userModel.findOne({email});
+   const User= await userModel.findById(userId);
 
    if(!User){
      return res.status(404)
      .json({success: false, message:"Please enter the correct email!"})
    }
-   if(User.resetOTP==='' || User.resetOTP!==otp){
-      return res.status(404)
-      .json({success:false,message:"Invalid OTP"})
-   }
-
-   if(User.resetOTPExpiredAt<Date.now()){
-          return res.status(400)
-      .json({success:false,message:"OTP Expired, Please try again"})
-   }
-
-   const hashedPassword=await bcrypt.hash(newPassword,10);//;encrypt new password
-   User.password= hashedPassword ;
-   User.resetOTP= '';
-   User.resetOTPExpiredAt=0;
-   await User.save();
    
+   const hashedNewPassword=await bcrypt.hash(newPassword,10);//;encrypt new password
+   User.password= hashedNewPassword ;
+
+   await User.save(); //save the new password
+
    return res.status(200)
              .json({success:true,message:"Password has been changed successfully"})
 }   
    catch(err){
             return res.status(400)
-      .json({success:false,message: err.message})  
+                      .json({success:false,message: err.message})  
    }
 }

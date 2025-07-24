@@ -26,7 +26,7 @@ const HandleSubmit= async(e) => {
     }
     try {
        const response = await axios.post(
-        'http://localhost:3000/api/auth/send-resetPassword-otp',{email},
+        'http://localhost:3000/api/auth/verify-Email-ChangePassword',{email},
         { withCredentials: true }
       );
 
@@ -71,6 +71,7 @@ const HandleSubmit= async(e) => {
                Enter the email to verify
               </p>
              </div>
+
             <div className="relative w-full">
               <input
                 className={`w-full border-none rounded-3xl bg-blue-800 py-3 pr-10 pl-12 text-md text-white placeholder-white autofill:bg-blue-800 ${emailField ? 'border border-red-500' : ''}`}
@@ -81,6 +82,7 @@ const HandleSubmit= async(e) => {
               />
               <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-white" />
             </div>
+
           </div>
 
           <button

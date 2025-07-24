@@ -3,12 +3,13 @@ import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import faviconImg from '../assets/favicon.svg';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import {LockKeyhole, Mail} from 'lucide-react'
 
 const OtpVerify = () => {
   // State for OTP digits and authentication status
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [error, setError] = useState('');
- 
+
   const navigate = useNavigate();
 
   // Handle input change for each OTP box
@@ -29,6 +30,7 @@ const OtpVerify = () => {
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     const otpString = otp.join('');
 
     // Validate OTP length
@@ -39,15 +41,17 @@ const OtpVerify = () => {
 
     try{
       const response = await axios.post(
-        'http://localhost:3000/api/auth/verifyEmail',
+        'http://localhost:3000/api/auth/verify-OTP-changePassword',
         { otp: otpString },
         { withCredentials: true }
       );
 
       if (response.data.success) {
-        toast.success('Email verified successfully!');
-        navigate('/'); // Redirect to Home after successful verification
-      } else {
+        toast.success(response.data.message||'OTP verified successfully!');
+
+        navigate('/set-new-password'); // Redirect to Home after successful verification
+      } 
+      else {
         setError(response.data.message || 'Verification failed');
       }
     }
@@ -78,7 +82,9 @@ const OtpVerify = () => {
           {error && (
             <p className="text-red-400 text-sm text-center mb-2">{error}</p>
           )}
-          <div className="flex gap-1 p-4 mb-2">
+          <div className='flex flex-col '>
+
+             <div className="flex gap-1 p-4 mt-2 mb-2">
             {otp.map((digit, index) => (
               <input
                 key={index}
@@ -91,8 +97,10 @@ const OtpVerify = () => {
                 required
               />
             ))}
-          </div>
-          <button className="bg-blue-600 py-4 px-20 rounded-3xl" type="submit">
+            </div>
+
+           </div> 
+          <button className="bg-blue-600 py-4 px-20 rounded-3xl mt-6" type="submit">
             Verify Email
           </button>
         </div>
