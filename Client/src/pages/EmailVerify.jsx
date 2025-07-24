@@ -1,145 +1,100 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
+
+import {useState} from 'react';
+import {useNavigate} from 'react-router-dom';
 import faviconImg from '../assets/favicon.svg';
-import axios from 'axios';
 import { toast } from 'react-toastify';
+import axios from 'axios';
+import { Mail } from 'lucide-react';
 
 const EmailVerify = () => {
-  // State for OTP digits and authentication status
-  const [otp, setOtp] = useState(['', '', '', '', '', '']);
-  const [error, setError] = useState('');
-  const [isAuthenticated, setIsAuthenticated] = useState(null); // null = loading, true = authenticated, false = not authenticated
-  const navigate = useNavigate();
 
-  // Check authentication status when component mounts
-  useEffect(() => {
-    const checkAuthentication = async () => {
-      try {
-        const response = await axios.post(
-          'http://localhost:3000/api/auth/is-Auth',
-          {}, // Empty body for POST
-          { withCredentials: true } // Include cookies (token)
-        );
+  const navigate= useNavigate();
 
-        if (response.data.success) {
-          setIsAuthenticated(true); // User is authenticated, show OTP form
-        } else {
-          setIsAuthenticated(false);
-          toast.error(response.data.message || 'Please log in to verify your email');
-          navigate('/login'); // Redirect to login page
-        }
-      } catch (error) {
-        console.error('Error checking authentication:', error);
-        setIsAuthenticated(false);
-        toast.error('Authentication failed. Please log in.');
-        navigate('/login');
-      }
-    };
+  const [isLoading,setIsLoading]= useState(false);
+  const [emailField,setEmailField]= useState(false);
+  const [email,setEmail]= useState('');
 
-    checkAuthentication();
-  }, []); // Include navigate in dependencies
+const HandleSubmit= async(e) => {
+   
+  e.preventDefault();
 
-  // Handle input change for each OTP box
-  const handleInputChange = (index, value) => {
-    if (value.length <= 1 && /^\d*$/.test(value)) {
-      const newOtp = [...otp];
-      newOtp[index] = value;
-      setOtp(newOtp);
-      setError(''); // Clear error on input change
-
-      // Auto-focus next input if current is filled
-      if (value && index < 5) {
-        document.getElementById(`otp-input-${index + 1}`).focus();
-      }
-    }
-  };
-
-  // Handle form submission
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const otpString = otp.join('');
-
-    // Validate OTP length
-    if (otpString.length !== 6) {
-      setError('Please enter a 6-digit OTP');
+    setIsLoading(true);
+   if (email.trim() === '' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setEmailField(true);
+      toast.error('Please enter a valid email address');
       return;
     }
-
     try {
-      const response = await axios.post(
-        'http://localhost:3000/api/auth/verifyEmail',
-        { otp: otpString },
+       const response = await axios.post(
+        'http://localhost:3000/api/auth/send-resetPassword-otp',{email},
         { withCredentials: true }
       );
 
-      if (response.data.success) {
-        toast.success('Email verified successfully!');
-        navigate('/'); // Redirect to Home after successful verification
-      } else {
-        setError(response.data.message || 'Verification failed');
+      if(response.status===200){
+        toast.success('OTP sent to your Email')
+        navigate('/otp-verify');
       }
-    } catch (err) {
-      console.error('Error verifying OTP:', err);
-      setError('Failed to verify OTP. Please try again.');
-      toast.error('failed retry')
+    
     }
-  };
+    catch (err) {
+      const {status, data}= err.response;
 
-  // Show loading state while checking authentication
-  if (isAuthenticated === null) {
-    return (
-      <div className="h-screen bg-gradient-to-br from-blue-200 to-purple-400 flex justify-center items-center">
-        <p>Loading...</p>
-      </div>
-    );
+      setIsLoading(false);
+
+      if (status === 400) {
+            toast.error(data.message || 'Email is required');
+            return;
+      }
+      if(status===404){
+      toast.error(data.message|| 'User not found');
+      return;
+      } 
+    else
+      toast.error(data.message);
+    }
   }
 
-  // Render OTP form if authenticated
-  if (isAuthenticated) {
-    return (
-      <form
-        className="h-screen bg-gradient-to-br from-blue-200 to-purple-400 flex justify-center items-center"
-        onSubmit={handleSubmit}
-      >
-        {/* Header positioned absolutely at the top */}
-        <div className="absolute top-0 left-0 flex gap-1 p-2">
-          <img src={faviconImg} alt="auth-logo" />
-          <h1 className="text-3xl font-bold">auth</h1>
-        </div>
+  return (
+  <div className="h-screen flex flex-col bg-gradient-to-br from-blue-200 to-purple-400">
+      <div className="flex gap-0.5 p-4 cursor-pointer absolute top-0 left-0" onClick={() => navigate('/')}>
+        <img className="h-10 w-28" src={faviconImg} alt="logo-img" />
+        <h1 className="font-bold text-3xl">auth</h1>
+      </div>
 
-        {/* Centered verification form */}
-        <div className="bg-blue-950 text-white px-10 py-8 rounded-3xl flex flex-col">
-          <h1 className="text-4xl font-bold text-center">Email Verify OTP</h1>
-          <p className="text-sm text-blue-400 px-4 py-1.5 text-center">
-            Enter the 6-digit code sent to your email
-          </p>
-          {error && (
-            <p className="text-red-400 text-sm text-center mb-2">{error}</p>
-          )}
-          <div className="flex gap-1 p-4 mb-2">
-            {otp.map((digit, index) => (
+      <form className="flex flex-1 justify-center items-center" onSubmit={HandleSubmit}>
+        <div className="flex flex-col bg-blue-950 text-white py-7 px-10 rounded-3xl w-[90%] max-w-md shadow-xl">
+
+          <div className="flex flex-col gap-5 w-full mt-4">
+            <div className='mb-4'>
+              <h1 className="text-4xl font-bold text-center">Email Verify </h1>
+               <p className="text-sm text-blue-400 px-4 py-1.5 text-center">
+               Enter the email to verify
+              </p>
+             </div>
+            <div className="relative w-full">
               <input
-                key={index}
-                id={`otp-input-${index}`}
-                className="h-12 w-12 rounded-xl border-2 bg-blue-950 no-spinner text-center text-white"
-                type="text" // Changed to text to prevent spinner
-                maxLength="1"
-                value={digit}
-                onChange={(e) => handleInputChange(index, e.target.value)}
-                required
+                className={`w-full border-none rounded-3xl bg-blue-800 py-3 pr-10 pl-12 text-md text-white placeholder-white autofill:bg-blue-800 ${emailField ? 'border border-red-500' : ''}`}
+                type="email"
+                placeholder="Email ID"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
               />
-            ))}
+              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-white" />
+            </div>
           </div>
-          <button className="bg-blue-600 py-4 px-20 rounded-3xl" type="submit">
-            Verify Email
+
+          <button
+            disabled={isLoading}
+            className={`bg-blue-600 py-3 mt-6 rounded-3xl font-medium hover:bg-blue-700 transition cursor-pointer ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+            type="submit"
+          >
+            {isLoading ? 'Processing...': 'Verify'}
           </button>
+
         </div>
       </form>
-    );
-  }
-
-  // If not authenticated, return null (navigate will handle redirect)
-  return null;
-};
+    </div>
+  )
+}
 
 export default EmailVerify;

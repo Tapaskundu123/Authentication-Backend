@@ -4,6 +4,7 @@ import { userModel } from '../models/user.model.js';
 import { transporter } from '../DB/nodemailer.js';
 import validator from 'validator'; // For email validation
 import crypto from 'crypto';
+
 export const register = async (req, res) => {
   const { name, email, password } = req.body;
 
@@ -14,7 +15,7 @@ export const register = async (req, res) => {
   try {
     const existingUser = await userModel.findOne({ email });
     if (existingUser) {
-      return res.status(400).json({ success: false, message: "Email already registered" });
+      return res.status(409).json({ success: false, message: "Email already registered" });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -139,7 +140,8 @@ export const sendVerifyOtp = async (req, res) => {
 
 export const verifyEmail = async (req, res) => {
   const { otp } = req.body;
-  const userId = req.user?.id; // Get from middleware
+  const userId = req.user?.id;
+  console.log('Received OTP:', otp, 'User ID:', userId); // Debug log
 
   if (!userId || !otp) {
     return res.status(400).json({ success: false, message: "Missing Details" });
@@ -147,15 +149,16 @@ export const verifyEmail = async (req, res) => {
 
   try {
     const User = await userModel.findById(userId);
-
     if (!User) {
       return res.status(404).json({ success: false, message: "User not found" });
     }
 
+    console.log('Stored OTP:', User.verifyOtp, 'Provided OTP:', otp); // Debug log
     if (!User.verifyOtp || User.verifyOtp !== otp) {
       return res.status(400).json({ success: false, message: "Invalid OTP" });
     }
 
+    console.log('OTP Expiration:', User.verifyOtpExpiredAt, 'Current Time:', Date.now()); // Debug log
     if (User.verifyOtpExpiredAt < Date.now()) {
       return res.status(400).json({ success: false, message: "OTP Expired" });
     }
@@ -163,11 +166,11 @@ export const verifyEmail = async (req, res) => {
     User.isEmailVerified = true;
     User.verifyOtp = '';
     User.verifyOtpExpiredAt = '';
-
     await User.save();
 
     return res.status(200).json({ success: true, message: "Email verified Successfully" });
   } catch (err) {
+    console.error('Server Error:', err); // Debug log
     return res.status(500).json({ success: false, message: "Server Error" });
   }
 };
@@ -239,7 +242,6 @@ export const resetPassword= async(req,res)=>{
    if(User.resetOTP==='' || User.resetOTP!==otp){
       return res.status(404)
       .json({success:false,message:"Invalid OTP"})
-   
    }
 
    if(User.resetOTPExpiredAt<Date.now()){
