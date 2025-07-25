@@ -4,13 +4,18 @@ import faviconImg from '../assets/favicon.svg';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import {LockKeyhole, Mail} from 'lucide-react'
+import { useLocation } from 'react-router-dom';
 
 const OtpVerify = () => {
+   const navigate = useNavigate();
+   const location = useLocation();
+
   // State for OTP digits and authentication status
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [error, setError] = useState('');
 
-  const navigate = useNavigate();
+
+  const {GoForgotPage,  GoLandingPage} = location?.state || {};
 
   // Handle input change for each OTP box
   const handleInputChange = (index, value) => {
@@ -46,11 +51,16 @@ const OtpVerify = () => {
         { withCredentials: true }
       );
 
-      if (response.data.success) {
+      if (response.data.success && GoForgotPage ) {
         toast.success(response.data.message||'OTP verified successfully!');
 
         navigate('/set-new-password'); // Redirect to Home after successful verification
       } 
+      if(response.data.success && GoLandingPage ){
+        toast.success('Email verified successfully!');
+     
+        navigate('/'); // Redirect to Home after successful verification
+      }
       else {
         setError(response.data.message || 'Verification failed');
       }

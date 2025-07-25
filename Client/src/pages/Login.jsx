@@ -183,7 +183,7 @@ const Login = () => {
 
           {!signUp && (
             <p className="p-2 text-sm text-right">
-              <span className="cursor-pointer" onClick={() => navigate('/reset-password')}>
+              <span className="cursor-pointer" onClick={()=>navigate('/email-verify',{state: {isEmailVerify:false, isForgotPassword:true}})}>
                 Forgot password?
               </span>
             </p>

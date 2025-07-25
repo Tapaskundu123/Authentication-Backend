@@ -1,6 +1,6 @@
 
 import {useState} from 'react';
-import {useNavigate} from 'react-router-dom';
+import {useLocation, useNavigate} from 'react-router-dom';
 import faviconImg from '../assets/favicon.svg';
 import { toast } from 'react-toastify';
 import axios from 'axios';
@@ -9,14 +9,18 @@ import { Mail } from 'lucide-react';
 const EmailVerify = () => {
 
   const navigate= useNavigate();
+  const location= useLocation();
 
   const [isLoading,setIsLoading]= useState(false);
   const [emailField,setEmailField]= useState(false);
   const [email,setEmail]= useState('');
 
+
 const HandleSubmit= async(e) => {
    
   e.preventDefault();
+
+  const { isForgotPassword, isEmailVerify }=location.state;
 
     setIsLoading(true);
    if (email.trim() === '' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
@@ -25,16 +29,22 @@ const HandleSubmit= async(e) => {
       return;
     }
     try {
-       const response = await axios.post(
+      
+      const response = await axios.post(
         'http://localhost:3000/api/auth/verify-Email-ChangePassword',{email},
         { withCredentials: true }
       );
 
-      if(response.status===200){
+      
+      if(response.status===200 && isForgotPassword ){
         toast.success('OTP sent to your Email')
-        navigate('/otp-verify');
+        navigate('/otp-verify',{state: { GoForgotPage: true, GoLandingPage: false } });
       }
-    
+      
+      if(response.status===200 && isEmailVerify ){
+        toast.success('OTP sent to your Email')
+        navigate('/otp-verify',{state: { GoLandingPage: true,  GoForgotPage: false} });
+      }
     }
     catch (err) {
       const {status, data}= err.response;
