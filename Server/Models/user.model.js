@@ -1,41 +1,42 @@
-// ...existing code...
-import mongoose from "mongoose";
-const userSchema= new mongoose.Schema({
+// Models/user.model.js
+import mongoose from 'mongoose';
 
-    name:{
-        type:String,
-        required:true
-    },
-    email:{
-        type:String,
-        required:true,
-        unique:true
-    },
-    password:{
-        type:String,
-        required:true
-    },
-    verifyOtp:{
-        type:String,
-        default:'' // changed to empty string
-    },
-    verifyOtpExpiredAt:{
-        type:Date,
-        default: null // changed to null
-    },
-    isEmailVerified:{
-        type:Boolean,
-        default:false
-    },
-    resetOTP:{
-        type:String,
-        default:'' // changed to empty string
-    },
-    resetOTPExpiredAt:{
-        type: Date,
-        default: null // changed to null
-    }
-})
+const userSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true
+  },
+  email: {
+    type: String,
+    required: true,
+    unique: true
+  },
+  password: {
+    type: String,
+    required: true
+  },
+  verifyOtp: {
+    type: String,
+    default: ''
+  },
+  verifyOtpExpiredAt: {
+    type: Date,
+    default: null
+  },
+  isEmailVerified: {
+    type: Boolean,
+    default: false
+  },
+  resetOTP: {
+    type: String,
+    default: ''
+  },
+  resetOTPExpiredAt: {
+    type: Date,
+    default: null
+  }
+}, { timestamps: true });
 
-export const userModel= mongoose.model('Users',userSchema);
-// ...existing code...
+const userModel = mongoose.models.Users || mongoose.model('Users', userSchema);
+
+export { userModel };

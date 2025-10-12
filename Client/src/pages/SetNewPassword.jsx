@@ -1,5 +1,6 @@
+//src/pages/SetNewPassword.jsx
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import faviconImg from '../assets/favicon.svg';
 import axios from 'axios';
 import { toast } from 'react-toastify';
@@ -10,8 +11,10 @@ const SetNewPassword = () => {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const navigate = useNavigate();
+  const location = useLocation();
+  const resetToken = location.state?.resetToken;
+  const email = location.state?.email;
 
-  // Handle form submission
   const HandleSubmit = async (e) => {
     e.preventDefault();
 
@@ -26,23 +29,28 @@ const SetNewPassword = () => {
     }
 
     if (newPassword !== confirmPassword) {
-      toast.error('New password and confirm password do not match');
+      toast.error('Passwords do not match');
       return;
     }
 
     try {
+      const headers = {};
+      if (resetToken) headers['Authorization'] = `Bearer ${resetToken}`;
+      
+      const payload = { newPassword };
+      if (email) payload.email = email;
+
       const response = await axios.post(
         'http://localhost:3000/api/auth/reset-password',
-        {
-          newPassword
-        },
-        { withCredentials: true }
+        payload,
+        { withCredentials: true, headers }
       );
-      if (response.status === 200) {
+      
+      if (response.data.success) {
         toast.success('Password changed successfully!');
-        navigate('/login'); // Redirect to Home after successful verification
+        navigate('/login');
       } else {
-        setError(response.data.message || 'Verification failed');
+        setError(response.data.message || 'Password reset failed');
       }
     } catch (err) {
       console.error(err);
@@ -56,21 +64,19 @@ const SetNewPassword = () => {
       className="h-screen bg-gradient-to-br from-blue-200 to-purple-400 flex justify-center items-center"
       onSubmit={HandleSubmit}
     >
-      {/* Header positioned absolutely at the top */}
       <div className="absolute top-0 left-0 flex gap-1 p-2">
         <img src={faviconImg} alt="auth-logo" />
         <h1 className="text-3xl font-bold">auth</h1>
       </div>
 
-      {/* Centered verification form */}
       <div className="bg-blue-950 text-white px-10 py-8 rounded-3xl flex flex-col">
         <h1 className="text-3xl font-bold text-center">Change Password</h1>
         <p className="text-sm text-blue-400 px-4 py-1.5 text-center">
           Change your old password
         </p>
-        {error && (
-          <p className="text-red-400 text-sm text-center mb-2">{error}</p>
-        )}
+        
+        {error && <p className="text-red-400 text-sm text-center mb-2">{error}</p>}
+        
         <div className="flex flex-col gap-2">
           <div className="relative w-full mt-2">
             <input
@@ -94,7 +100,8 @@ const SetNewPassword = () => {
             <LockKeyhole className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-white" />
           </div>
         </div>
-        <button className="bg-blue-600 py-4 px-20 rounded-3xl mt-6" type="submit">
+        
+        <button className="bg-blue-600 py-4 px-20 rounded-3xl mt-6 hover:bg-blue-700 transition" type="submit">
           Change Password
         </button>
       </div>

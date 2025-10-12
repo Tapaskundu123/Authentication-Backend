@@ -1,4 +1,4 @@
-
+// src/App.jsx
 import './App.css'
 import { Routes, Route } from 'react-router-dom'
 import EmailVerify from './pages/EmailVerify.jsx'
