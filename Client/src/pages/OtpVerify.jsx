@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import faviconImg from '../assets/favicon.svg';
 import axios from 'axios';
 import { toast } from 'react-toastify';
-import {LockKeyhole, Mail} from 'lucide-react'
+// import {LockKeyhole, Mail} from 'lucide-react'
 import { useLocation } from 'react-router-dom';
 
 const OtpVerify = () => {
@@ -15,7 +15,7 @@ const OtpVerify = () => {
   const [error, setError] = useState('');
 
 
-  const {GoForgotPage,  GoLandingPage} = location?.state || {};
+  const {GoForgotPage,  GoLandingPage, email} = location?.state || {};
 
   // Handle input change for each OTP box
   const handleInputChange = (index, value) => {
@@ -43,27 +43,36 @@ const OtpVerify = () => {
       setError('Please enter a 6-digit OTP');
       return;
     }
+       // For forgot-password flow we must have email
+    if (GoForgotPage && !email) {
+      setError('Email missing for password-reset flow');
+      return;
+    }
 
     try{
+
+       const payload = GoForgotPage ? { otp: otpString, email } : { otp: otpString };
+
       const response = await axios.post(
         'http://localhost:3000/api/auth/verify-OTP-changePassword',
-        { otp: otpString },
+        payload,
         { withCredentials: true }
       );
 
       if (response.data.success && GoForgotPage ) {
-        toast.success(response.data.message||'OTP verified successfully!');
-
-        navigate('/set-new-password'); // Redirect to Home after successful verification
+        toast.success(response.data.message || 'OTP verified successfully!');
+        // pass email forward if needed for set-new-password
+        navigate('/set-new-password', { state: { email } });
+        return;
       } 
-      if(response.data.success && GoLandingPage ){
-        toast.success('Email verified successfully!');
-     
-        navigate('/'); // Redirect to Home after successful verification
+
+      if (response.data.success && GoLandingPage ){
+        toast.success(response.data.message || 'Email verified successfully!');
+        navigate('/dashboard');
+        return;
       }
-      else {
-        setError(response.data.message || 'Verification failed');
-      }
+
+      setError(response.data.message || 'Verification failed');
     }
      catch (err) {
       console.error('Error verifying OTP:', err);

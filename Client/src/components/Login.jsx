@@ -31,7 +31,7 @@ const Login = () => {
       hasError = true;
       toast.error('Name is required');
     }
-    if (email.trim() === '' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    if ( email.trim() === '' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ) {
       setEmailField(true);
       hasError = true;
       toast.error('Please enter a valid email address');
@@ -60,8 +60,10 @@ const Login = () => {
             toast.error(res.data.message || 'Registration failed');
             return;
           }
-          toast.success('Successfully registered your account');
-          navigate('/');
+          toast.success('Successfully registered your account'); 
+          localStorage.setItem('User',JSON.stringify(res.data.User));
+          // navigate('/dashboard');
+          navigate('/otp-verify',{state:{ GoForgotPage: false, GoLandingPage: true, email }})
         } else {
           toast.error(res.data.message || 'Registration failed');
         }
@@ -75,11 +77,14 @@ const Login = () => {
           toast.error(res.data.message || 'Login failed');
           return;
         }
-        if (res.status === 200) {
+        if ( res.status === 200 ){
           toast.success('Successfully logged in your account');
-          navigate('/');
-        } else {
+          localStorage.setItem('User',JSON.stringify(res.data.user));
+          navigate('/dashboard');
+        } 
+        else {
           toast.error(res.data.message || 'Login failed');
+          return;
         }
       }
     } catch (err) {

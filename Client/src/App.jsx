@@ -3,13 +3,14 @@ import './App.css'
 import { Routes, Route } from 'react-router-dom'
 import EmailVerify from './pages/EmailVerify.jsx'
 import ResetPassword from './pages/ResetPassword.jsx'
-import Login from './pages/Login'
+import Login from './components/Login.jsx'
 import Home from './pages/Home';
 // App.jsx or main.jsx
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import SetNewPassword from './pages/SetNewPassword.jsx'
 import OtpVerify from './pages/OtpVerify.jsx'
+import Dashboard from './pages/Dashboard.jsx'
 
 function App() {
 
@@ -20,6 +21,7 @@ function App() {
      <Routes>
         <Route path='/' element={<Home/>}/>
         <Route path='/login' element={<Login/>}/>
+        <Route path='/dashboard' element={<Dashboard/>}/>
         <Route path='/otp-verify' element={<OtpVerify/>}/>
         <Route path='/email-verify' element={<EmailVerify/>}/>
         <Route path='/reset-password' element={<ResetPassword/>}/>

@@ -15,52 +15,57 @@ const EmailVerify = () => {
   const [emailField,setEmailField]= useState(false);
   const [email,setEmail]= useState('');
 
+// read only flags from navigation state, default to {}
+  const { isForgotPassword, isEmailVerify } = location.state || {};
 
-const HandleSubmit= async(e) => {
-   
-  e.preventDefault();
-
-  const { isForgotPassword, isEmailVerify }=location.state;
+  const HandleSubmit= async(e) => {
+    e.preventDefault();
 
     setIsLoading(true);
-   if (email.trim() === '' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+
+    // validate using component state `email`
+    if (email.trim() === '' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       setEmailField(true);
+      setIsLoading(false);
       toast.error('Please enter a valid email address');
       return;
     }
+
     try {
-      
       const response = await axios.post(
-        'http://localhost:3000/api/auth/verify-Email-ChangePassword',{email},
+        'http://localhost:3000/api/auth/verify-Email-ChangePassword',
+        { email },
         { withCredentials: true }
       );
 
-      
+      setIsLoading(false);
       if(response.status===200 && isForgotPassword ){
         toast.success('OTP sent to your Email')
-        navigate('/otp-verify',{state: { GoForgotPage: true, GoLandingPage: false } });
+        navigate('/otp-verify',{state: { GoForgotPage: true, GoLandingPage: false, email } });
+        return;
       }
-      
+
       if(response.status===200 && isEmailVerify ){
         toast.success('OTP sent to your Email')
         navigate('/otp-verify',{state: { GoLandingPage: true,  GoForgotPage: false} });
+        return;
       }
     }
     catch (err) {
-      const {status, data}= err.response;
-
       setIsLoading(false);
+      const status = err?.response?.status;
+      const data = err?.response?.data;
 
       if (status === 400) {
-            toast.error(data.message || 'Email is required');
-            return;
+        toast.error(data?.message || 'Email is required');
+        return;
       }
-      if(status===404){
-      toast.error(data.message|| 'User not found');
-      return;
-      } 
-    else
-      toast.error(data.message);
+      if (status === 404) {
+        toast.error(data?.message || 'User not found');
+        return;
+      }
+
+      toast.error(data?.message || 'Something went wrong');
     }
   }
 

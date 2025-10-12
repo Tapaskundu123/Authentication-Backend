@@ -1,14 +1,16 @@
 import React from 'react'
-import Navbar from '../components/Navbar';
-import Header from '../components/Header';
+import Login from '../components/Login'
+// import Navbar from '../components/Navbar';
+// import Header from '../components/Header';
+// import { useLocation } from 'react-router-dom';
 
 const Home = () => {
+
   return (
     <>
-    <div className='flex flex-col min-h-screen'>
-      <Navbar />
-      <Header/>
-    </div>
+     <div >
+       <Login/>
+     </div>
     </>
   )
 }

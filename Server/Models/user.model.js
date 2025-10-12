@@ -1,3 +1,4 @@
+// ...existing code...
 import mongoose from "mongoose";
 const userSchema= new mongoose.Schema({
 
@@ -16,11 +17,11 @@ const userSchema= new mongoose.Schema({
     },
     verifyOtp:{
         type:String,
-        default:0
+        default:'' // changed to empty string
     },
     verifyOtpExpiredAt:{
         type:Date,
-        default:0
+        default: null // changed to null
     },
     isEmailVerified:{
         type:Boolean,
@@ -28,12 +29,13 @@ const userSchema= new mongoose.Schema({
     },
     resetOTP:{
         type:String,
-        default:false
+        default:'' // changed to empty string
     },
     resetOTPExpiredAt:{
         type: Date,
-        default:0
+        default: null // changed to null
     }
 })
 
 export const userModel= mongoose.model('Users',userSchema);
+// ...existing code...

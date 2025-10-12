@@ -15,7 +15,7 @@ authrouter.post('/is-Auth',UserAuthMiddleware,isAuthenticated);
 // updated
 authrouter.post('/verify-Email-ChangePassword',verifyEmailChangePassword);
 
-authrouter.post('/verify-OTP-changePassword',UserAuthMiddleware,verifyOtpChangePassword );
+authrouter.post('/verify-OTP-changePassword',verifyOtpChangePassword );
 
 authrouter.post('/reset-password',UserAuthMiddleware,resetNewPassword);
 
