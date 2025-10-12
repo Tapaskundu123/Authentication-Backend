@@ -30,7 +30,7 @@ const EmailVerify = () => {
 
     try {
       const response = await axios.post(
-        'http://localhost:3000/api/auth/verify-Email-ChangePassword',
+        'https://authentication-backend-lkgy.onrender.com/api/auth/verify-Email-ChangePassword',
         { email },
         { withCredentials: true }
       );

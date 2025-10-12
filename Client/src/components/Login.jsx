@@ -51,7 +51,7 @@ const Login = () => {
     try {
       if (signUp) {
         const SignUpSend = { name, email, password };
-        const res = await axios.post('http://localhost:3000/api/auth/register', SignUpSend, {
+        const res = await axios.post('https://authentication-backend-lkgy.onrender.com/api/auth/register', SignUpSend, {
           withCredentials: true,
           headers: { 'Content-Type': 'application/json' },
         });
@@ -64,7 +64,7 @@ const Login = () => {
         }
       } else {
         const LoginDataSend = { email, password };
-        const res = await axios.post('http://localhost:3000/api/auth/login', LoginDataSend, {
+        const res = await axios.post('https://authentication-backend-lkgy.onrender.com/api/auth/login', LoginDataSend, {
           withCredentials: true,
           headers: { 'Content-Type': 'application/json' },
         });

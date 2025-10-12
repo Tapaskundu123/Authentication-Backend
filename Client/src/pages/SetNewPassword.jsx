@@ -41,7 +41,7 @@ const SetNewPassword = () => {
       if (email) payload.email = email;
 
       const response = await axios.post(
-        'http://localhost:3000/api/auth/reset-password',
+        'https://authentication-backend-lkgy.onrender.com/api/auth/reset-password',
         payload,
         { withCredentials: true, headers }
       );

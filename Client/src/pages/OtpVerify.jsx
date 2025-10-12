@@ -84,8 +84,8 @@ const OtpVerify = () => {
     try {
       const payload = { otp: otpString, email };
       const url = GoForgotPage 
-        ? 'http://localhost:3000/api/auth/verify-OTP-changePassword' 
-        : 'http://localhost:3000/api/auth/verify-registration-otp';
+        ? 'https://authentication-backend-lkgy.onrender.com/api/auth/verify-OTP-changePassword' 
+        : 'https://authentication-backend-lkgy.onrender.com/api/auth/verify-registration-otp';
 
       const response = await axios.post(url, payload, { withCredentials: true });
 
@@ -130,8 +130,8 @@ const OtpVerify = () => {
 
     try {
       const url = GoForgotPage 
-        ? 'http://localhost:3000/api/auth/verify-Email-ChangePassword' 
-        : 'http://localhost:3000/api/auth/resend-otp';
+        ? 'https://authentication-backend-lkgy.onrender.com/api/auth/verify-Email-ChangePassword' 
+        : 'https://authentication-backend-lkgy.onrender.com/api/auth/resend-otp';
       
       const response = await axios.post(url, { email }, { withCredentials: true });
 
