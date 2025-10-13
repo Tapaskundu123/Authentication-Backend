@@ -16,6 +16,8 @@ const EmailVerify = () => {
 
   const { isForgotPassword, isEmailVerify } = location.state || {};
 
+  const backendURL = import.meta.env.VITE_BACKEND_URL;
+
   const HandleSubmit = async (e) => {
     e.preventDefault();
 
@@ -30,7 +32,7 @@ const EmailVerify = () => {
 
     try {
       const response = await axios.post(
-        'https://authentication-backend-lkgy.onrender.com/api/auth/verify-Email-ChangePassword',
+        `${backendURL}/api/auth/verify-Email-ChangePassword`,
         { email },
         { withCredentials: true }
       );

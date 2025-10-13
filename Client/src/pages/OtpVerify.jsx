@@ -14,6 +14,8 @@ const OtpVerify = () => {
   const [timeLeft, setTimeLeft] = useState(0);
   const [isExpired, setIsExpired] = useState(false);
 
+  const backendURL = import.meta.env.VITE_BACKEND_URL;
+
   const { GoForgotPage, GoLandingPage, email } = location?.state || {};
 
   useEffect(() => {
@@ -84,8 +86,8 @@ const OtpVerify = () => {
     try {
       const payload = { otp: otpString, email };
       const url = GoForgotPage 
-        ? 'https://authentication-backend-lkgy.onrender.com/api/auth/verify-OTP-changePassword' 
-        : 'https://authentication-backend-lkgy.onrender.com/api/auth/verify-registration-otp';
+        ? `${backendURL}/api/auth/verify-OTP-changePassword`
+        : `${backendURL}/api/auth/verify-registration-otp`;
 
       const response = await axios.post(url, payload, { withCredentials: true });
 
@@ -130,8 +132,8 @@ const OtpVerify = () => {
 
     try {
       const url = GoForgotPage 
-        ? 'https://authentication-backend-lkgy.onrender.com/api/auth/verify-Email-ChangePassword' 
-        : 'https://authentication-backend-lkgy.onrender.com/api/auth/resend-otp';
+        ? `${backendURL}/api/auth/verify-Email-ChangePassword` 
+        : `${backendURL}/api/auth/resend-otp`;
       
       const response = await axios.post(url, { email }, { withCredentials: true });
 

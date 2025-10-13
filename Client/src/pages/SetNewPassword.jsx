@@ -15,6 +15,8 @@ const SetNewPassword = () => {
   const resetToken = location.state?.resetToken;
   const email = location.state?.email;
 
+    const backendURL = import.meta.env.VITE_BACKEND_URL;
+
   const HandleSubmit = async (e) => {
     e.preventDefault();
 
@@ -41,7 +43,7 @@ const SetNewPassword = () => {
       if (email) payload.email = email;
 
       const response = await axios.post(
-        'https://authentication-backend-lkgy.onrender.com/api/auth/reset-password',
+        `${backendURL}/api/auth/reset-password`,
         payload,
         { withCredentials: true, headers }
       );
