@@ -22,9 +22,6 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 // app.js (updated CORS section)
 // app.js — CORS (replace your current cors block with this)
-// ...existing code...
-import cors from 'cors';
-// ...existing code...
 
 const allowedOrigins = [
   process.env.FRONTEND_URL_KEY || 'https://authentication-mern-one.vercel.app',
