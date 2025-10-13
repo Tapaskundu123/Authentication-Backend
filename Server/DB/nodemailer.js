@@ -2,7 +2,7 @@
 import nodemailer from 'nodemailer';
 
 const host = process.env.SMTP_HOST || 'smtp-relay.brevo.com';
-const port = parseInt(process.env.SMTP_PORT, 10) || 587;
+const port = parseInt(process.env.SMTP_PORT, 10) || 465;
 const secure = (process.env.SMTP_SECURE === 'true') || port === 465;
 const user = process.env.SMTP_USER || process.env.SENDER_EMAIL;
 const pass = process.env.SMTP_PASS || process.env.BREVO_SMTP_PASS;
