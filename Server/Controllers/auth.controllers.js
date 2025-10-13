@@ -56,8 +56,8 @@ export const register = async (req, res) => {
     const tempToken = signToken({ email }, '5m');
     res.cookie('tempToken', tempToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+      secure: process.env.NODE_ENV==='production',
+      sameSite: process.env.NODE_ENV==='production' ? 'none' : 'strict',
       maxAge: 5 * 60 * 1000,
     });
 

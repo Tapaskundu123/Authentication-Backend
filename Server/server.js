@@ -20,13 +20,36 @@ app.use((req, res, next) => {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+// app.js (updated CORS section)
+// app.js — CORS (replace your current cors block with this)
+const allowedOrigins = [
+  process.env.FRONTEND_URL_KEY, // e.g. "https://authentication-mern-one.vercel.app"
+  'http://localhost:5173',
+  'https://localhost:5173'
+];
+
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL_KEY, // adjust if needed for frontend
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+    origin: (origin, callback) => {
+      // allow requests with no origin (e.g., Postman, mobile clients, or same-origin)
+      if (!origin) return callback(null, true);
+
+      // exact-match check
+      if (allowedOrigins.includes(origin)) {
+        // pass `true` to allow; cors will automatically set Access-Control-Allow-Origin to the request origin
+        return callback(null, true);
+      }
+
+      // otherwise reject
+      return callback(new Error(`Not allowed by CORS: ${origin}`));
+    },
+    methods: ['GET','POST','PUT','PATCH','DELETE','OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
+    optionsSuccessStatus: 200
   })
 );
+
 
 // Routes
 app.get('/', (_, res) => {
