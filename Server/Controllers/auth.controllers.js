@@ -9,10 +9,13 @@ import { transporter } from '../DB/nodemailer.js';
 // Helper to sign tokens
 const signToken = (payload, expiresIn = '7d') => jwt.sign(payload, process.env.JWT_SECRET_KEY, { expiresIn });
 
+// ...existing code...
 export const register = async (req, res) => {
   const { name, email, password } = req.body;
   if (!name || !email || !password)
     return res.status(400).json({ success: false, message: 'Missing details' });
+
+  let newTemp = null; // moved outside try so catch can reference it
 
   try {
     const existingUser = await userModel.findOne({ email });
@@ -24,7 +27,7 @@ export const register = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     const otp = crypto.randomInt(100000, 999999).toString();
 
-    const newTemp = new tempUserModel({
+    newTemp = new tempUserModel({
       name,
       email,
       password: hashedPassword,
@@ -33,12 +36,22 @@ export const register = async (req, res) => {
     });
     await newTemp.save();
 
-    await transporter.sendMail({
-      from: process.env.SENDER_EMAIL,
-      to: email,
-      subject: 'Welcome - Verify Your Email',
-      text: `Your OTP is ${otp} (valid 5 minutes)`,
-    });
+    try {
+      await transporter.sendMail({
+        from: process.env.SENDER_EMAIL,
+        to: email,
+        subject: 'Welcome - Verify Your Email',
+        text: `Your OTP is ${otp} (valid 5 minutes)`,
+      });
+    } catch (mailErr) {
+      console.error('Mail send error:', mailErr);
+      // If mail fails, remove temp user and return error
+      if (newTemp && newTemp._id) {
+        await tempUserModel.deleteOne({ _id: newTemp._id }).catch(() => {});
+        newTemp = null;
+      }
+      return res.status(500).json({ success: false, message: 'Failed to send verification email' });
+    }
 
     const tempToken = signToken({ email }, '5m');
     res.cookie('tempToken', tempToken, {
@@ -58,9 +71,18 @@ export const register = async (req, res) => {
     return res.status(201).json(payload);
   } catch (err) {
     console.error('Registration error:', err);
+    // cleanup temp user if created
+    if (newTemp && newTemp._id) {
+      try {
+        await tempUserModel.deleteOne({ _id: newTemp._id });
+      } catch (cleanupErr) {
+        console.error('Failed to cleanup temp user:', cleanupErr);
+      }
+    }
     return res.status(500).json({ success: false, message: 'Server error' });
   }
 };
+// ...existing code...
 
 export const resendOtp = async (req, res) => {
   const { email } = req.body;
