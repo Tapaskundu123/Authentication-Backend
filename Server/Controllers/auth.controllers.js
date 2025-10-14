@@ -123,8 +123,8 @@ export const resendOtp = async (req, res) => {
 };
 
 export const verifyRegistrationOtp = async (req, res) => {
-  const { otp, email: bodyEmail } = req.body;
-  const email = req.temp?.email || bodyEmail;
+  const { otp } = req.body;
+  const email = req.temp?.email;
   if (!otp || !email) return res.status(400).json({ success: false, message: 'Missing OTP or email' });
 
   try {

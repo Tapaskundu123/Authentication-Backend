@@ -2,7 +2,7 @@
 import './App.css'
 import { Routes, Route } from 'react-router-dom'
 import EmailVerify from './pages/EmailVerify.jsx'
-import ResetPassword from './pages/ResetPassword.jsx'
+import ResetPassword from './pages/TestMail.jsx'
 import Login from './components/Login.jsx'
 import Home from './pages/Home';
 // App.jsx or main.jsx
@@ -11,7 +11,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import SetNewPassword from './pages/SetNewPassword.jsx'
 import OtpVerify from './pages/OtpVerify.jsx'
 import Dashboard from './pages/Dashboard.jsx'
-
+import TestMail from './pages/TestMail.jsx'
 function App() {
 
   return (
@@ -24,7 +24,7 @@ function App() {
         <Route path='/dashboard' element={<Dashboard/>}/>
         <Route path='/otp-verify' element={<OtpVerify/>}/>
         <Route path='/email-verify' element={<EmailVerify/>}/>
-        <Route path='/reset-password' element={<ResetPassword/>}/>
+        <Route path='/test-mail' element={<TestMail/>}/>
         <Route path='/set-new-password' element={<SetNewPassword/>}/>
      </Routes>
   </div>

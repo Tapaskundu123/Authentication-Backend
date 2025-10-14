@@ -24,31 +24,27 @@ app.use(cookieParser());
 // app.js — CORS (replace your current cors block with this)
 const allowedOrigins = [
   process.env.FRONTEND_URL_KEY, // e.g. "https://authentication-mern-one.vercel.app"
-  'http://localhost:5173',
+  'https://authentication-mern-one.vercel.app',
   'https://localhost:5173'
 ];
 
 app.use(
   cors({
-    origin: (origin, callback) => {
-      // allow requests with no origin (e.g., Postman, mobile clients, or same-origin)
-      if (!origin) return callback(null, true);
-
-      // exact-match check
-      if (allowedOrigins.includes(origin)) {
-        // pass `true` to allow; cors will automatically set Access-Control-Allow-Origin to the request origin
-        return callback(null, true);
-      }
-
-      // otherwise reject
-      return callback(new Error(`Not allowed by CORS: ${origin}`));
-    },
-    methods: ['GET','POST','PUT','PATCH','DELETE','OPTIONS'],
+   origin: function (origin, callback) {
+    // Allow requests with no origin (like curl, Postman)
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },// Adjust to your React app’s port
+    methods: ['GET','POST'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
     optionsSuccessStatus: 200
   })
 );
+
 
 
 // Routes
@@ -58,7 +54,25 @@ app.get('/', (_, res) => {
 
 //app endpoints
 app.use('/api/auth',authRoutes);
-app.use('/api/user',userRoutes)
+app.use('/api/user',userRoutes);
+
+// eg test email
+import { transporter } from './DB/nodemailer.js';
+
+app.get('/test-mail', async (req, res) => {
+  try {
+    await transporter.sendMail({
+      from: process.env.SENDER_EMAIL,
+      to: 'tapaskundu3762@gmail.com',
+      subject: 'Mail test from Brevo',
+      text: 'If you see this, your Brevo SMTP is working perfectly!',
+    });
+    res.send('✅ Test email sent successfully!');
+  } catch (err) {
+    console.error('❌ Mail test failed:', err);
+    res.status(500).send('Mail test failed. Check console for details.');
+  }
+});
 
 // Server
 const PORT = process.env.PORT || 3000;
