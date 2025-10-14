@@ -19,8 +19,8 @@ export const register = async (req, res) => {
 
   try {
     const existingUser = await userModel.findOne({ email });
-    const existingTemp = await tempUserModel.findOne({ email });
-    if (existingUser || existingTemp) {
+    
+    if (existingUser) {
       return res.status(409).json({ success: false, message: 'Email already registered' });
     }
 
