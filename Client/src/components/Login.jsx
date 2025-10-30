@@ -17,7 +17,7 @@ const Login = () => {
   const [passwordField, setPasswordField] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const backendURL = import.meta.env.VITE_BACKEND_URL;
+  const backendURL = import.meta.env.BACKEND_URL;
 
   const HandleSubmit = async (e) => {
     e.preventDefault();

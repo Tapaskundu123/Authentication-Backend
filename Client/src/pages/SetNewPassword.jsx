@@ -15,7 +15,7 @@ const SetNewPassword = () => {
   const resetToken = location.state?.resetToken;
   const email = location.state?.email;
 
-    const backendURL = import.meta.env.VITE_BACKEND_URL;
+    const backendURL = import.meta.env.BACKEND_URL;
 
   const HandleSubmit = async (e) => {
     e.preventDefault();
