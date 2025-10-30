@@ -14,7 +14,7 @@ const OtpVerify = () => {
   const [timeLeft, setTimeLeft] = useState(0);
   const [isExpired, setIsExpired] = useState(false);
 
-  const backendURL = import.meta.env.BACKEND_URL;
+  const backendURL = import.meta.env.VITE_BACKEND_URL;
 
   const { GoForgotPage, GoLandingPage, email } = location?.state || {};
 
