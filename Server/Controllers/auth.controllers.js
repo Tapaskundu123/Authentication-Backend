@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import { userModel } from '../Models/user.model.js';
 import { tempUserModel } from '../Models/tempUser.model.js';
-import { transporter } from '../DB/nodemailer.js';
+import { sendEmail } from '../DB/brevo.js';
 
 // Helper to sign tokens
 const signToken = (payload, expiresIn = '7d') => jwt.sign(payload, process.env.JWT_SECRET_KEY, { expiresIn });
@@ -37,12 +37,7 @@ export const register = async (req, res) => {
     await newTemp.save();
 
     try {
-      await transporter.sendMail({
-        from: process.env.SENDER_EMAIL,
-        to: email,
-        subject: 'Welcome - Verify Your Email',
-        text: `Your OTP is ${otp} (valid 5 minutes)`,
-      });
+      await sendEmail(email, 'Welcome - Verify Your Email', `Your OTP is ${otp} (valid 5 minutes)`);
     } catch (mailErr) {
       console.error('Mail send error:', mailErr);
       // If mail fails, remove temp user and return error
@@ -97,12 +92,7 @@ export const resendOtp = async (req, res) => {
     tempUser.verifyOtpExpiredAt = Date.now() + 5 * 60 * 1000;
     await tempUser.save();
 
-    await transporter.sendMail({
-      from: process.env.SENDER_EMAIL,
-      to: email,
-      subject: 'Resend OTP',
-      text: `Your OTP is ${otp} (valid 5 minutes)`,
-    });
+    await sendEmail(email, 'Resend OTP', `Your OTP is ${otp} (valid 5 minutes)`);
 
     const tempToken = signToken({ email }, '5m');
     res.cookie('tempToken', tempToken, {
@@ -158,12 +148,7 @@ export const verifyRegistrationOtp = async (req, res) => {
       sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
     });
 
-    await transporter.sendMail({
-      from: process.env.SENDER_EMAIL,
-      to: email,
-      subject: 'Welcome',
-      text: `Welcome ${newUser.name}, your account is verified.`,
-    });
+    await sendEmail(email, 'Welcome', `Welcome ${newUser.name}, your account is verified.`);
 
     return res.status(200).json({ 
       success: true, 
@@ -204,12 +189,7 @@ export const verifyEmailChangePassword = async (req, res) => {
     user.resetOTPExpiredAt = Date.now() + 15 * 60 * 1000;
     await user.save();
 
-    await transporter.sendMail({
-      from: process.env.SENDER_EMAIL,
-      to: email,
-      subject: 'Password Reset OTP',
-      text: `Your password reset OTP is ${otp} (valid 15 minutes).`,
-    });
+    await sendEmail(email, 'Password Reset OTP', `Your password reset OTP is ${otp} (valid 15 minutes).`);
 
     return res.status(200).json({ success: true, message: 'Reset OTP sent to email' });
   } catch (err) {
@@ -271,12 +251,7 @@ export const sendVerifyOtp = async (req, res) => {
     user.verifyOtpExpiredAt = Date.now() + 24 * 60 * 60 * 1000;
     await user.save();
 
-    await transporter.sendMail({
-      from: process.env.SENDER_EMAIL,
-      to: user.email,
-      subject: 'Account Verification OTP',
-      text: `Your OTP is ${otp}.`,
-    });
+    await sendEmail(user.email, 'Account Verification OTP', `Your OTP is ${otp}.`);
 
     return res.status(200).json({ success: true, message: 'Verification OTP sent to email' });
   } catch (err) {
