@@ -6,6 +6,8 @@ import cookieParser from 'cookie-parser';
 import ConnectDB from './DB/MongoDB.js';
 import authRoutes from './Routes/authRoutes.js'
 import userRoutes from './Routes/userRoutes.js'
+// eg test email
+import { transporter } from './DB/nodemailer.js';
 
 ConnectDB();//connect to Database
 const app = express();
@@ -16,12 +18,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// Core middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser());
-// app.js (updated CORS section)
-// app.js — CORS (replace your current cors block with this)
+
 const allowedOrigins = [
   process.env.FRONTEND_URL_KEY, // e.g. "https://authentication-mern-one.vercel.app"
   'https://authentication-mern-one.vercel.app',
@@ -46,6 +43,14 @@ app.use(
 );
 
 
+// Core middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
+// app.js (updated CORS section)
+// app.js — CORS (replace your current cors block with this)
+
+
 
 // Routes
 app.get('/', (_, res) => {
@@ -56,8 +61,6 @@ app.get('/', (_, res) => {
 app.use('/api/auth',authRoutes);
 app.use('/api/user',userRoutes);
 
-// eg test email
-import { transporter } from './DB/nodemailer.js';
 
 app.get('/test-mail', async (req, res) => {
   try {
