@@ -23,8 +23,6 @@ const __dirname = path.dirname(__filename);
 // -------------------------------------------------
 config({ path: path.resolve(__dirname, '.env') });
 
-console.log('BREVO_API_KEY:', process.env.BREVO_API_KEY ? 'Loaded' : 'Missing!');
-console.log('SENDER_EMAIL:', process.env.SENDER_EMAIL ? 'Loaded' : 'Missing!');
 
 // -------------------------------------------------
 // 3. Connect DB
@@ -145,7 +143,7 @@ if (process.env.NODE_ENV !== 'production') {
       res.status(500).send(`Mail test failed: ${err.message}`);
     }
   });
-}
+ }
 
 // -------------------------------------------------
 // 12. Global error handler (optional but nice)

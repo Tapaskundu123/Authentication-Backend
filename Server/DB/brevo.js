@@ -1,9 +1,15 @@
 // DB/brevo.js
 import Brevo from '@getbrevo/brevo';
 
-const DEFAULT_SENDER = {
-  name: 'Mern Auth App',
+const getSender = () => ({
+  name: process.env.SENDER_NAME || 'Mern Auth App',
   email: process.env.SENDER_EMAIL,
+});
+
+const setApiKey = (api) => {
+  // keep current SDK pattern but guard if missing
+  if (!process.env.BREVO_API_KEY) throw new Error('Missing BREVO_API_KEY');
+  api.setApiKey?.(Brevo.TransactionalEmailsApiApiKeys?.apiKey, process.env.BREVO_API_KEY);
 };
 
 export const verifyBrevo = async () => {
@@ -16,15 +22,17 @@ export const verifyBrevo = async () => {
     return false;
   }
 
-  const apiInstance = new Brevo.AccountApi();
-  apiInstance.setApiKey(Brevo.AccountApiApiKeys.apiKey, process.env.BREVO_API_KEY);
-
   try {
+    const apiInstance = new Brevo.AccountApi();
+    setApiKey(apiInstance);
     const response = await apiInstance.getAccount();
-    console.log('✅ Brevo API ready:', response.companyName || response.firstName || 'Account');
+    console.log('✅ Brevo API ready:', response?.companyName || response?.firstName || 'Account');
     return true;
   } catch (error) {
-    console.error('❌ Brevo API verification failed:', error.message || error);
+    console.error('❌ Brevo API verification failed:', error?.message || error);
+    if (error?.response) {
+      console.error('Brevo verify response body:', error.response?.body || error.response);
+    }
     return false;
   }
 };
@@ -34,44 +42,45 @@ export const sendEmail = async (to, subject, text, html = null) => {
     throw new Error('Missing BREVO_API_KEY or SENDER_EMAIL in .env');
   }
 
-  const sendSmtpEmail = new Brevo.SendSmtpEmail();
-  sendSmtpEmail.sender = DEFAULT_SENDER;
-  sendSmtpEmail.to = [{ email: to }];
-  sendSmtpEmail.subject = subject;
-  sendSmtpEmail.textContent = text;
-  if (html) {
-    sendSmtpEmail.htmlContent = html;
-  }
+  const payload = {
+    sender: getSender(),
+    to: [{ email: to }],
+    subject,
+    textContent: text,
+    ...(html ? { htmlContent: html } : {}),
+  };
+
+  console.log('📨 sendEmail payload:', JSON.stringify(payload));
 
   const emailApi = new Brevo.TransactionalEmailsApi();
-  emailApi.setApiKey(Brevo.TransactionalEmailsApiApiKeys.apiKey, process.env.BREVO_API_KEY);
+  try {
+    setApiKey(emailApi);
+  } catch (err) {
+    console.error('Failed to set Brevo API key:', err);
+    throw err;
+  }
 
   try {
-    const result = await emailApi.sendTransacEmail(sendSmtpEmail);
-    
-    // 🔧 FIX: Extract "message-id" from result (Brevo API uses kebab-case)
-    const messageId = result['message-id'] || result.messageId || 'ID not available';
-    
-    console.log('✅ Email sent successfully:', messageId);
-    
-    return { success: true, messageId };
-  }
-catch (error) {
-    // Better error parsing for Brevo SDK
-    const errorCode = error.code || (error.response?.status || 500);
-    const errorMessage = error.message || 'Unknown error';
-    
-    console.error('❌ Email send failed:', { code: errorCode, message: errorMessage });
-    
-    // Common Brevo errors
-    if (errorCode === 401) {
-      throw new Error('Brevo 401: Invalid API key. Regenerate at https://app.brevo.com/settings/keys/api');
-    } else if (errorCode === 400 && errorMessage.includes('sender')) {
-      throw new Error('Brevo 400: Sender email not verified. Verify at https://app.brevo.com/account/senders');
-    } else if (errorCode === 402) {
-      throw new Error('Brevo 402: Insufficient credits. Check your plan.');
+    const result = await emailApi.sendTransacEmail(payload);
+    // Log full result so you can inspect
+    console.log('✅ Brevo sendTransacEmail result:', JSON.stringify(result, null, 2));
+    // Return raw result so calling code can inspect it (very useful in /test-mail)
+    return { success: true, raw: result };
+  } catch (error) {
+    // Very detailed logging for debugging
+    console.error('❌ Brevo sendTransacEmail error message:', error?.message || error);
+    if (error?.response) {
+      console.error('Brevo HTTP status:', error.response?.status);
+      try {
+        console.error('Brevo response body:', JSON.stringify(error.response?.body || error.response, null, 2));
+      } catch (e) {
+        console.error('Brevo response body (raw):', error.response?.body || error.response);
+      }
     }
-    
-    throw new Error(`Brevo email failed (${errorCode}): ${errorMessage}`);
+    // Some SDKs put useful details in error.response?.body or error?.body
+    const code = error?.response?.status || error?.code || 'unknown';
+    const msg = error?.message || JSON.stringify(error?.response?.body || error) || 'Unknown';
+    // Throw a clear error so your controller can handle / log it
+    throw new Error(`Brevo email failed (${code}): ${msg}`);
   }
 };
